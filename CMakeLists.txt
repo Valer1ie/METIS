@@ -14,6 +14,10 @@ enable_testing()
 
 include(FetchContent)
 
+if(WIN32 AND CMAKE_C_COMPILER MATCHES ".*clang.*")
+ add_compile_options(-Wno-implicit-function-declaration)
+endif()
+
 if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT AND metis_IS_TOP_LEVEL)
   set(CMAKE_INSTALL_PREFIX "${PROJECT_BINARY_DIR}/local" CACHE PATH "install prefix" FORCE)
 endif()
@@ -24,7 +28,7 @@ message(STATUS "${PROJECT_NAME} ${PROJECT_VERSION} CMake ${CMAKE_VERSION} instal
 
 FetchContent_Declare(GKlib
 GIT_REPOSITORY https://github.com/scivision/GKlib.git
-GIT_TAG 6897bfe
+# GIT_TAG  8bd6bad750b2b0d90800c632cf18e8ee93ad72d7
 GIT_SHALLOW true
 )
 FetchContent_MakeAvailable(GKlib)
@@ -41,7 +45,10 @@ include(conf/gkbuild.cmake)
 install(FILES include/metis.h TYPE INCLUDE)
 
 # Build libmetis.
-add_library(metis)
+add_library(metis SHARED)
+set_target_properties(metis PROPERTIES
+WINDOWS_EXPORT_ALL_SYMBOLS ON
+)
 target_include_directories(metis PUBLIC
 $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/libmetis>
 $<INSTALL_INTERFACE:include>
